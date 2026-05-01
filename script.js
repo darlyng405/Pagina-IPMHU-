@@ -1,5 +1,5 @@
 // script.js - Versión corregida y completa
-const API = "http://localhost:3000/api";  // Cambia si el backend usa otro puerto o dominio
+const API = "https://backend-ipmhu.onrender.com/api";  // Cambia si el backend usa otro puerto o dominio
 let CURRENT_USER = null;
 let CURRENT_ROLE = null;
 let AUTH_TOKEN = null;
