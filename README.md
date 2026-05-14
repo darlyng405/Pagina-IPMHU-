@@ -5,6 +5,8 @@
 <div align="center">
 # Sistema de Gestión Académica — IPMHU
 </div>
+<br>
+
 **Plataforma web para la gestión de asistencia, calificaciones, conducta, tareas y horarios del Instituto Politécnico Max Henrriquez Ureña (IPMHU).**
 
 **Ver en Producción:** https://darlyng405.github.io/Pagina-IPMHU-/  
