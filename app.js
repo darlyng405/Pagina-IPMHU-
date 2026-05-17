@@ -28,6 +28,27 @@ async function handleLogin() {
     msg.innerText = "Verificando...";
 
     const data = await api.login(u, p);
+
+    // Rate limit alcanzado: mostrar cuenta regresiva
+    if (data?._status === 429) {
+        const segundos = data.retryafter ?? 900; // retryafter viene normalizado a minúsculas
+        let restantes = segundos;
+        const btnLogin = document.getElementById('btn-login');
+        btnLogin.disabled = true;
+        const intervalo = setInterval(() => {
+            restantes--;
+            const min = Math.ceil(restantes / 60);
+            msg.innerText = `Demasiados intentos. Intentá de nuevo en ${min} minuto(s). (${restantes}s)`;
+            if (restantes <= 0) {
+                clearInterval(intervalo);
+                btnLogin.disabled = false;
+                msg.innerText = "Podés intentar de nuevo.";
+            }
+        }, 1000);
+        msg.innerText = `Demasiados intentos. Intentá de nuevo en ${Math.ceil(segundos / 60)} minuto(s). (${segundos}s)`;
+        return;
+    }
+
     if (!data || !data.success) {
         msg.innerText = data?.msg || "Error de conexión";
         return;
@@ -43,7 +64,7 @@ async function handleLogin() {
 function setupUI() {
     document.getElementById('login-overlay').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
-    document.getElementById('user-display').innerText = CURRENT_USER.nombre || CURRENT_USER.nombre_completo;
+    document.getElementById('user-display').innerText = CURRENT_USER.nombre || CURRENT_USER.nombreCompleto;
     document.getElementById('role-display').innerText = CURRENT_ROLE;
     renderSidebar();
     // Cargar vista inicial según rol
@@ -344,11 +365,11 @@ window.app.docenteCargarExcusas = async function(idCurso) {
     const div = document.getElementById('d-area');
     div.innerHTML = "Buscando excusas...";
     const res = await api.getExcusas(idCurso);
-    if (!res || !res.success || !res.excusas || res.excusas.length === 0) {
+    if (!res || !res.success || !res.data || res.data.length === 0) {
         div.innerHTML = "<p style='color:var(--text-light)'>No hay excusas registradas para este curso.</p>";
         return;
     }
-    div.innerHTML = ui.renderExcusas(res.excusas);
+    div.innerHTML = ui.renderExcusas(res.data);
 };
 
 window.app.docenteGenerarHistorial = async function() {
@@ -359,9 +380,9 @@ window.app.docenteGenerarHistorial = async function() {
     if (!curso) return alert("Seleccione un curso");
     div.innerHTML = "Generando reporte...";
     const res = await api.getHistorial(curso, mes, anio);
-    if (!res || !res.success || !res.registros.length) return div.innerHTML = "No hay datos para este periodo.";
+    if (!res || !res.success || !res.data.length) return div.innerHTML = "No hay datos para este periodo.";
     const diasDelMes = new Date(anio, parseInt(mes)+1, 0).getDate();
-    div.innerHTML = ui.renderHistorial(res.registros, diasDelMes);
+    div.innerHTML = ui.renderHistorial(res.data, diasDelMes);
 };
 
 window.app.docenteGenerarReporteNotas = async function() {
@@ -631,7 +652,7 @@ async function loadStudentView(view) {
         studentFetchAndRender('getTareasEstudiante', content, data => ui.renderTareas(data));
     } else if (view === 'horario') {
         content.innerHTML = `<div class="card"><h3>Horario de Clases (${CURRENT_USER.curso})</h3><div id="s-horario">Cargando...</div></div>`;
-        const res = await api.getHorario(CURRENT_USER.curso_id, 'curso');
+        const res = await api.getHorario(CURRENT_USER.cursoId, 'curso');
         const div = document.getElementById('s-horario');
         if (res && res.success && res.data.length) div.innerHTML = ui.renderHorarioTable(res.data);
         else div.innerHTML = "No hay horario disponible.";
@@ -642,13 +663,13 @@ async function studentFetchAndRender(action, container, renderFn) {
     container.innerHTML = 'Cargando...';
     let data;
     switch (action) {
-        case 'getStudentReports': data = await api.getStudentReports(CURRENT_USER.id_sistema); break;
-        case 'getStudentAttendance': data = await api.getStudentAttendance(CURRENT_USER.id_sistema); break;
-        case 'getStudentGradesDetail': data = await api.getStudentGradesDetail(CURRENT_USER.id_sistema); break;
-        case 'getStudentGradesP': data = await api.getStudentGradesP(CURRENT_USER.id_sistema); break;
-        case 'getStudentGradesRA': data = await api.getStudentGradesRA(CURRENT_USER.id_sistema); break;
-        case 'getStudentExcuses': data = await api.getStudentExcuses(CURRENT_USER.id_sistema); break;
-        case 'getTareasEstudiante': data = await api.getTareasEstudiante(CURRENT_USER.id_sistema); break;
+        case 'getStudentReports': data = await api.getStudentReports(CURRENT_USER.idSistema); break;
+        case 'getStudentAttendance': data = await api.getStudentAttendance(CURRENT_USER.idSistema); break;
+        case 'getStudentGradesDetail': data = await api.getStudentGradesDetail(CURRENT_USER.idSistema); break;
+        case 'getStudentGradesP': data = await api.getStudentGradesP(CURRENT_USER.idSistema); break;
+        case 'getStudentGradesRA': data = await api.getStudentGradesRA(CURRENT_USER.idSistema); break;
+        case 'getStudentExcuses': data = await api.getStudentExcuses(CURRENT_USER.idSistema); break;
+        case 'getTareasEstudiante': data = await api.getTareasEstudiante(CURRENT_USER.idSistema); break;
         default: data = null;
     }
     if (data && data.success) container.innerHTML = `<div class="card">${renderFn(data.data)}</div>`;

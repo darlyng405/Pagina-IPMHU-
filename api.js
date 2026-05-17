@@ -1,4 +1,4 @@
-// api.js — Centraliza todas las peticiones HTTP al backend
+// js/api.js — Centraliza todas las peticiones HTTP al backend SIA-IPMHU
 const API_BASE = 'https://backend-ipmhu.onrender.com/api';
 let AUTH_TOKEN = null;
 
@@ -6,7 +6,12 @@ export function setToken(token) {
     AUTH_TOKEN = token;
 }
 
-// Convierte recursivamente las claves de un objeto a minúsculas
+/**
+ * normalizeKeys
+ * Convierte recursivamente todas las claves de un objeto a minúsculas.
+ * Actúa como red de seguridad ante respuestas legacy — puede removerse
+ * en v1.2 una vez confirmada la migración completa a camelCase.
+ */
 function normalizeKeys(obj) {
     if (Array.isArray(obj)) {
         return obj.map(normalizeKeys);
@@ -20,7 +25,13 @@ function normalizeKeys(obj) {
     return obj;
 }
 
-// Envoltorio para fetch con token y manejo de errores
+/**
+ * authFetch
+ * Envoltorio para fetch que inyecta el JWT y normaliza la respuesta.
+ * Incluye el HTTP status en data._status para que el FE reaccione
+ * a códigos específicos (429 rate limit, 401 expirado) sin romper
+ * la interfaz existente.
+ */
 async function authFetch(endpoint, options = {}) {
     const headers = {
         'Content-Type': 'application/json',
@@ -29,10 +40,10 @@ async function authFetch(endpoint, options = {}) {
     };
 
     try {
-        const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res  = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
         const data = await res.json();
-        return normalizeKeys(data); // <-- normaliza todas las claves a minúsculas
+        data._status = res.status;
+        return normalizeKeys(data);
     } catch (err) {
         console.error(`Error en ${endpoint}:`, err);
         return null;
@@ -40,15 +51,24 @@ async function authFetch(endpoint, options = {}) {
 }
 
 // ==================== AUTENTICACIÓN ====================
+
 export async function login(usuario, password) {
-    const data = await authFetch('/login', {
+    return await authFetch('/login', {
         method: 'POST',
         body: JSON.stringify({ usuario, password }),
     });
-    return data; // { success, token, user }
+}
+
+/** El id del usuario lo toma el backend del token JWT — no se envía en el body. */
+export async function cambiarPassword(passwordActual, passwordNueva) {
+    return await authFetch('/cambiarPassword', {
+        method: 'POST',
+        body: JSON.stringify({ password_actual: passwordActual, password_nueva: passwordNueva }),
+    });
 }
 
 // ==================== DOCENTE ====================
+
 export async function getAlumnos(cursoId) {
     return await authFetch(`/getAlumnos?curso=${cursoId}`);
 }
@@ -105,35 +125,37 @@ export async function getReporteNotas(curso, periodo, filtro = '') {
 }
 
 // ==================== ESTUDIANTE ====================
-export async function getStudentGradesDetail(id) {
-    return await authFetch(`/getStudentGradesDetail?id=${id}`);
+
+export async function getStudentGradesDetail() {
+    return await authFetch(`/getStudentGradesDetail`);
 }
 
-export async function getStudentGradesP(id) {
-    return await authFetch(`/getStudentGradesP?id=${id}`);
+export async function getStudentGradesP() {
+    return await authFetch(`/getStudentGradesP`);
 }
 
-export async function getStudentGradesRA(id) {
-    return await authFetch(`/getStudentGradesRA?id=${id}`);
+export async function getStudentGradesRA() {
+    return await authFetch(`/getStudentGradesRA`);
 }
 
-export async function getStudentAttendance(id) {
-    return await authFetch(`/getStudentAttendance?id=${id}`);
+export async function getStudentAttendance() {
+    return await authFetch(`/getStudentAttendance`);
 }
 
-export async function getStudentExcuses(id) {
-    return await authFetch(`/getStudentExcuses?id=${id}`);
+export async function getStudentExcuses() {
+    return await authFetch(`/getStudentExcuses`);
 }
 
-export async function getTareasEstudiante(id) {
-    return await authFetch(`/getTareasEstudiante?id=${id}`);
+export async function getTareasEstudiante() {
+    return await authFetch(`/getTareasEstudiante`);
 }
 
-export async function getStudentReports(id) {
-    return await authFetch(`/getStudentReports?id=${id}`);
+export async function getStudentReports() {
+    return await authFetch(`/getStudentReports`);
 }
 
 // ==================== ORIENTACIÓN ====================
+
 export async function buscarEstudiante(id) {
     return await authFetch(`/buscarEstudiante?id=${id}`);
 }
@@ -153,6 +175,7 @@ export async function guardarPase(payload) {
 }
 
 // ==================== HORARIO Y AUDITORÍA ====================
+
 export async function getHorario(id, tipo) {
     return await authFetch(`/getHorario?id=${encodeURIComponent(id)}&tipo=${tipo}`);
 }
