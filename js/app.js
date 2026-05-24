@@ -620,12 +620,13 @@ function loadOrientacionView(view) {
                     <div><label>Nombre</label><input id="p-nom" readonly></div>
                     <div><label>Curso</label><input id="p-cur" readonly></div>
                 </div>
-                <label>Retira</label><input id="p-retira">
+                <label>Nombre de quien retira</label><input id="p-retira">
+                <label>Cédula / Pasaporte de quien retira</label><input id="p-cedula" placeholder="Ej: 402-1234567-8">
                 <label>Motivo</label><textarea id="p-motivo"></textarea>
                 <button id="btn-pase" class="btn-primary">GENERAR PDF</button>
             </div>`;
-        on('p-id',      'change', orientacionDatosPase);
-        on('btn-pase',  'click',  orientacionGenerarPase);
+        on('p-id',     'change', orientacionDatosPase);
+        on('btn-pase', 'click',  orientacionGenerarPase);
 
     } else if (view === 'exc') {
         content.innerHTML = `
@@ -725,19 +726,125 @@ async function orientacionDatosPase() {
 }
 
 async function orientacionGenerarPase() {
+    const retira   = document.getElementById('p-retira').value.trim();
+    const cedula   = document.getElementById('p-cedula').value.trim();
+    const motivo   = document.getElementById('p-motivo').value.trim();
+    const numPase  = document.getElementById('p-pds').value;
+    const nombre   = document.getElementById('p-nom').value;
+    const curso    = document.getElementById('p-cur').value;
+    const idEst    = document.getElementById('p-id').value.trim();
+
+    if (!idEst)    { ui.toast('Ingrese el ID del estudiante', 'error'); return; }
+    if (!retira)   { ui.toast('Ingrese el nombre de quien retira', 'error'); return; }
+    if (!cedula)   { ui.toast('Ingrese la cédula/pasaporte de quien retira', 'error'); return; }
+    if (!motivo)   { ui.toast('Ingrese el motivo', 'error'); return; }
+
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.text(`PASE DE SALIDA: ${document.getElementById('p-pds').value}`, 20, 20);
-    doc.text(`Estudiante: ${document.getElementById('p-nom').value}`, 20, 30);
-    doc.text(`Retira: ${document.getElementById('p-retira').value}`, 20, 40);
-    doc.save('pase.pdf');
-    const user = store.get('user');
-    await api.guardarPase({
-        tipo:          'pase',
-        idEstudiante:  document.getElementById('p-id').value,
-        motivo:        document.getElementById('p-motivo').value,
-        autorizadoPor: user.nombreCompleto || user.nombre,
+    const doc   = new jsPDF({ unit: 'mm', format: 'a4' });
+    const user  = store.get('user');
+    const fecha = new Date().toLocaleDateString('es-DO', { year: 'numeric', month: 'long', day: 'numeric' });
+    const hora  = new Date().toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit' });
+
+    const W = 210; // ancho A4
+    const M = 20;  // margen
+
+    // ── Borde exterior ────────────────────────────────────────────────────────
+    doc.setDrawColor(0, 48, 135);
+    doc.setLineWidth(0.8);
+    doc.rect(M - 5, 10, W - (M - 5) * 2, 267);
+
+    // ── Encabezado ────────────────────────────────────────────────────────────
+    doc.setFillColor(0, 48, 135);
+    doc.rect(M - 5, 10, W - (M - 5) * 2, 22, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('INSTITUTO POLITÉCNICO MONSEÑOR HUGO URIBE', W / 2, 19, { align: 'center' });
+    doc.setFontSize(11);
+    doc.text('DEPARTAMENTO DE ORIENTACIÓN', W / 2, 26, { align: 'center' });
+
+    // ── Título ────────────────────────────────────────────────────────────────
+    doc.setTextColor(206, 17, 38);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PASE DE SALIDA', W / 2, 42, { align: 'center' });
+
+    // ── Línea separadora ──────────────────────────────────────────────────────
+    doc.setDrawColor(206, 17, 38);
+    doc.setLineWidth(0.5);
+    doc.line(M, 45, W - M, 45);
+
+    // ── Info del pase ─────────────────────────────────────────────────────────
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`N° ${numPase}`, M, 51);
+    doc.text(`Fecha: ${fecha}  Hora: ${hora}`, W - M, 51, { align: 'right' });
+
+    // ── Tabla de datos ────────────────────────────────────────────────────────
+    const campos = [
+        ['Estudiante',              nombre],
+        ['Curso',                   curso],
+        ['Nombre de quien retira',  retira],
+        ['Cédula / Pasaporte',      cedula],
+        ['Motivo',                  motivo],
+        ['Autorizado por',          user.nombreCompleto || user.nombre],
+    ];
+
+    let y = 60;
+    doc.setLineWidth(0.3);
+    campos.forEach(([label, valor], i) => {
+        const bg = i % 2 === 0 ? [245, 247, 252] : [255, 255, 255];
+        doc.setFillColor(...bg);
+        doc.rect(M, y, W - M * 2, 10, 'F');
+        doc.setDrawColor(220, 220, 220);
+        doc.rect(M, y, W - M * 2, 10);
+
+        doc.setTextColor(0, 48, 135);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.text(label + ':', M + 3, y + 6.5);
+
+        doc.setTextColor(50, 50, 50);
+        doc.setFont('helvetica', 'normal');
+        doc.text(valor || '—', M + 55, y + 6.5);
+
+        y += 10;
     });
+
+    // ── Firmas ────────────────────────────────────────────────────────────────
+    y += 20;
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.4);
+    doc.line(M,          y, M + 60,      y);
+    doc.line(W - M - 60, y, W - M,       y);
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    doc.text('Firma — Orientación',       M,          y + 5);
+    doc.text('Firma — Quien retira', W - M - 60, y + 5);
+
+    // ── Pie ───────────────────────────────────────────────────────────────────
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text('Documento generado por SIA-IPMHU', W / 2, 272, { align: 'center' });
+
+    // ── Guardar PDF ───────────────────────────────────────────────────────────
+    doc.save(`pase-${idEst}-${numPase}.pdf`);
+
+    // ── Guardar en BD ─────────────────────────────────────────────────────────
+    const res = await api.guardarPase({
+        tipo:          'pase',
+        idEstudiante:  idEst,
+        motivo,
+        autorizadoPor: user.nombreCompleto || user.nombre,
+        cedulaRetira:  cedula,
+        nombreRetira:  retira,
+    });
+
+    res?.success ? ui.toast('Pase generado y guardado') : ui.toast('PDF generado pero error al guardar en BD', 'error');
 }
 
 async function orientacionBuscarHorario() {
