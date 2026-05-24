@@ -635,24 +635,89 @@ function loadOrientacionView(view) {
         on('o-bus-id',   'keydown', e => { if (e.key === 'Enter') orientacionBuscar(); });
 
     } else if (view === 'pas') {
+        const user = store.get('user');
         content.innerHTML = `
             <div class="card">
                 <h3>Pase de Salida</h3>
+
+                <p style="font-size:0.85rem;color:var(--text-light);margin-top:-5px;margin-bottom:20px;">
+                    Complete los datos y presione <strong>Registrar</strong>. Luego podrá descargar el PDF.
+                </p>
+
+                <h4 style="color:var(--primary);margin-bottom:10px;">Datos del Estudiante</h4>
                 <div class="grid">
-                    <div><label>ID Estudiante</label><input id="p-id"></div>
-                    <div><label>N° Pase</label><input id="p-pds" readonly></div>
+                    <div>
+                        <label>ID del Estudiante</label>
+                        <div style="display:flex;gap:8px;">
+                            <input id="p-id" placeholder="Ej: EST-001" style="margin:0">
+                            <button id="btn-buscar-est" class="btn-primary" style="width:auto;padding:10px 14px;">BUSCAR</button>
+                        </div>
+                    </div>
+                    <div><label>Fecha</label><input id="p-fecha" type="date" readonly style="background:#f5f5f5"></div>
                 </div>
+                <div class="grid" style="margin-top:10px;">
+                    <div><label>Nombre Completo</label><input id="p-nom" readonly style="background:#f5f5f5" placeholder="(autocompletado)"></div>
+                    <div><label>Curso / Sección</label><input id="p-cur" readonly style="background:#f5f5f5" placeholder="(autocompletado)"></div>
+                </div>
+
+                <h4 style="color:var(--primary);margin:20px 0 10px;">Datos del Pase</h4>
                 <div class="grid">
-                    <div><label>Nombre</label><input id="p-nom" readonly></div>
-                    <div><label>Curso</label><input id="p-cur" readonly></div>
+                    <div>
+                        <label>Hora de Salida</label>
+                        <input id="p-hora" type="time">
+                    </div>
+                    <div>
+                        <label>Motivo de Salida</label>
+                        <select id="p-motivo">
+                            <option value="">-- Seleccione --</option>
+                            <option>Cita médica</option>
+                            <option>Emergencia familiar</option>
+                            <option>Diligencia personal</option>
+                            <option>Otro</option>
+                        </select>
+                    </div>
                 </div>
-                <label>Nombre de quien retira</label><input id="p-retira">
-                <label>Cédula / Pasaporte de quien retira</label><input id="p-cedula" placeholder="Ej: 402-1234567-8">
-                <label>Motivo</label><textarea id="p-motivo"></textarea>
-                <button id="btn-pase" class="btn-primary">GENERAR PDF</button>
+                <label>Descripción / Detalle (opcional)</label>
+                <textarea id="p-detalle" rows="2" placeholder="Información adicional sobre el motivo..."></textarea>
+
+                <h4 style="color:var(--primary);margin:20px 0 10px;">Responsable del Retiro</h4>
+                <div class="grid">
+                    <div><label>Nombre de quien retira</label><input id="p-retira" placeholder="Nombre completo"></div>
+                    <div><label>Cédula / Pasaporte</label><input id="p-cedula" placeholder="Ej: 402-1234567-8"></div>
+                </div>
+                <label>Parentesco / Relación con el estudiante</label>
+                <select id="p-parentesco">
+                    <option value="">-- Seleccione --</option>
+                    <option>Padre</option>
+                    <option>Madre</option>
+                    <option>Tutor/a legal</option>
+                    <option>Hermano/a mayor</option>
+                    <option>Tío/a</option>
+                    <option>Otro familiar</option>
+                    <option>Otro</option>
+                </select>
+
+                <h4 style="color:var(--primary);margin:20px 0 10px;">Autorización</h4>
+                <label>Autorizado por</label>
+                <input id="p-autoriza" value="${user.nombreCompleto || user.nombre}" readonly style="background:#f5f5f5">
+
+                <div style="margin-top:25px;display:flex;gap:10px;flex-wrap:wrap;">
+                    <button id="btn-pase" class="btn-primary">REGISTRAR PASE</button>
+                    <button id="btn-descargar-pdf" class="btn-primary" style="display:none;background:var(--success);">⬇ DESCARGAR PDF</button>
+                </div>
+                <div id="p-confirmacion" style="display:none;margin-top:15px;padding:12px 16px;background:#d4edda;color:#155724;border-radius:8px;font-weight:600;"></div>
             </div>`;
-        on('p-id',     'change', orientacionDatosPase);
-        on('btn-pase', 'click',  orientacionGenerarPase);
+
+        // Setear fecha de hoy
+        document.getElementById('p-fecha').value = new Date().toISOString().split('T')[0];
+        // Setear hora actual
+        const ahora = new Date();
+        document.getElementById('p-hora').value =
+            `${String(ahora.getHours()).padStart(2,'0')}:${String(ahora.getMinutes()).padStart(2,'0')}`;
+
+        on('btn-buscar-est', 'click',  orientacionDatosPase);
+        on('p-id',           'keydown', e => { if (e.key === 'Enter') orientacionDatosPase(); });
+        on('btn-pase',       'click',  orientacionGenerarPase);
 
     } else if (view === 'exc') {
         content.innerHTML = `
@@ -742,135 +807,101 @@ async function orientacionVerNotas(endpoint) {
 }
 
 async function orientacionDatosPase() {
-    const id  = document.getElementById('p-id').value;
+    const id  = document.getElementById('p-id').value.trim();
+    if (!id) { ui.toast('Ingrese el ID del estudiante', 'error'); return; }
     const res = await api.buscarEstudiante(id);
     if (res?.success) {
-        document.getElementById('p-pds').value = Date.now();
         document.getElementById('p-nom').value = res.data.nombre;
         document.getElementById('p-cur').value = res.data.curso;
+        ui.toast(`Estudiante encontrado: ${res.data.nombre}`);
+    } else {
+        ui.toast(res?._status === 404 ? 'Estudiante no encontrado' : 'Error al buscar', 'error');
+        document.getElementById('p-nom').value = '';
+        document.getElementById('p-cur').value = '';
     }
 }
 
 async function orientacionGenerarPase() {
-    const retira   = document.getElementById('p-retira').value.trim();
-    const cedula   = document.getElementById('p-cedula').value.trim();
-    const motivo   = document.getElementById('p-motivo').value.trim();
-    const numPase  = document.getElementById('p-pds').value;
-    const nombre   = document.getElementById('p-nom').value;
-    const curso    = document.getElementById('p-cur').value;
-    const idEst    = document.getElementById('p-id').value.trim();
+    const idEst      = document.getElementById('p-id').value.trim();
+    const nombre     = document.getElementById('p-nom').value.trim();
+    const retira     = document.getElementById('p-retira').value.trim();
+    const cedula     = document.getElementById('p-cedula').value.trim();
+    const motivo     = document.getElementById('p-motivo').value;
+    const detalle    = document.getElementById('p-detalle').value.trim();
+    const hora       = document.getElementById('p-hora').value;
+    const parentesco = document.getElementById('p-parentesco').value;
+    const autoriza   = document.getElementById('p-autoriza').value;
 
-    if (!idEst)    { ui.toast('Ingrese el ID del estudiante', 'error'); return; }
-    if (!retira)   { ui.toast('Ingrese el nombre de quien retira', 'error'); return; }
-    if (!cedula)   { ui.toast('Ingrese la cédula/pasaporte de quien retira', 'error'); return; }
-    if (!motivo)   { ui.toast('Ingrese el motivo', 'error'); return; }
+    // Validaciones
+    if (!idEst || !nombre) { ui.toast('Busque primero al estudiante por ID', 'error'); return; }
+    if (!motivo)            { ui.toast('Seleccione el motivo de salida', 'error'); return; }
+    if (!retira)            { ui.toast('Ingrese el nombre de quien retira', 'error'); return; }
+    if (!cedula)            { ui.toast('Ingrese la cédula/pasaporte de quien retira', 'error'); return; }
+    if (!parentesco)        { ui.toast('Seleccione el parentesco/relación', 'error'); return; }
 
-    const { jsPDF } = window.jspdf;
-    const doc   = new jsPDF({ unit: 'mm', format: 'a4' });
-    const user  = store.get('user');
-    const fecha = new Date().toLocaleDateString('es-DO', { year: 'numeric', month: 'long', day: 'numeric' });
-    const hora  = new Date().toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit' });
+    const btnRegistrar = document.getElementById('btn-pase');
+    btnRegistrar.disabled  = true;
+    btnRegistrar.innerText = 'Registrando...';
 
-    const W = 210; // ancho A4
-    const M = 20;  // margen
-
-    // ── Borde exterior ────────────────────────────────────────────────────────
-    doc.setDrawColor(0, 48, 135);
-    doc.setLineWidth(0.8);
-    doc.rect(M - 5, 10, W - (M - 5) * 2, 267);
-
-    // ── Encabezado ────────────────────────────────────────────────────────────
-    doc.setFillColor(0, 48, 135);
-    doc.rect(M - 5, 10, W - (M - 5) * 2, 22, 'F');
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text('INSTITUTO POLITÉCNICO MONSEÑOR HUGO URIBE', W / 2, 19, { align: 'center' });
-    doc.setFontSize(11);
-    doc.text('DEPARTAMENTO DE ORIENTACIÓN', W / 2, 26, { align: 'center' });
-
-    // ── Título ────────────────────────────────────────────────────────────────
-    doc.setTextColor(206, 17, 38);
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text('PASE DE SALIDA', W / 2, 42, { align: 'center' });
-
-    // ── Línea separadora ──────────────────────────────────────────────────────
-    doc.setDrawColor(206, 17, 38);
-    doc.setLineWidth(0.5);
-    doc.line(M, 45, W - M, 45);
-
-    // ── Info del pase ─────────────────────────────────────────────────────────
-    doc.setTextColor(100, 100, 100);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`N° ${numPase}`, M, 51);
-    doc.text(`Fecha: ${fecha}  Hora: ${hora}`, W - M, 51, { align: 'right' });
-
-    // ── Tabla de datos ────────────────────────────────────────────────────────
-    const campos = [
-        ['Estudiante',              nombre],
-        ['Curso',                   curso],
-        ['Nombre de quien retira',  retira],
-        ['Cédula / Pasaporte',      cedula],
-        ['Motivo',                  motivo],
-        ['Autorizado por',          user.nombreCompleto || user.nombre],
-    ];
-
-    let y = 60;
-    doc.setLineWidth(0.3);
-    campos.forEach(([label, valor], i) => {
-        const bg = i % 2 === 0 ? [245, 247, 252] : [255, 255, 255];
-        doc.setFillColor(...bg);
-        doc.rect(M, y, W - M * 2, 10, 'F');
-        doc.setDrawColor(220, 220, 220);
-        doc.rect(M, y, W - M * 2, 10);
-
-        doc.setTextColor(0, 48, 135);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
-        doc.text(label + ':', M + 3, y + 6.5);
-
-        doc.setTextColor(50, 50, 50);
-        doc.setFont('helvetica', 'normal');
-        doc.text(valor || '—', M + 55, y + 6.5);
-
-        y += 10;
-    });
-
-    // ── Firmas ────────────────────────────────────────────────────────────────
-    y += 20;
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.4);
-    doc.line(M,          y, M + 60,      y);
-    doc.line(W - M - 60, y, W - M,       y);
-
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(80, 80, 80);
-    doc.text('Firma — Orientación',       M,          y + 5);
-    doc.text('Firma — Quien retira', W - M - 60, y + 5);
-
-    // ── Pie ───────────────────────────────────────────────────────────────────
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    doc.text('Documento generado por SIA-IPMHU', W / 2, 272, { align: 'center' });
-
-    // ── Guardar PDF ───────────────────────────────────────────────────────────
-    doc.save(`pase-${idEst}-${numPase}.pdf`);
-
-    // ── Guardar en BD ─────────────────────────────────────────────────────────
-    const res = await api.guardarPase({
+    // Paso 1: guardar en BD
+    const user = store.get('user');
+    const res  = await api.guardarPase({
         tipo:          'pase',
         idEstudiante:  idEst,
         motivo,
-        autorizadoPor: user.nombreCompleto || user.nombre,
+        detalle,
+        horaSalida:    hora,
+        parentesco,
+        autorizadoPor: autoriza,
         cedulaRetira:  cedula,
         nombreRetira:  retira,
     });
 
-    res?.success ? ui.toast('Pase generado y guardado') : ui.toast('PDF generado pero error al guardar en BD', 'error');
+    btnRegistrar.disabled  = false;
+    btnRegistrar.innerText = 'REGISTRAR PASE';
+
+    if (!res?.success) {
+        ui.toast(res?.msg || 'Error al guardar el pase', 'error');
+        return;
+    }
+
+    const paseId = res.id;
+
+    // Confirmación en pantalla
+    const conf = document.getElementById('p-confirmacion');
+    conf.style.display = 'block';
+    conf.innerText = `✅ Pase N° ${String(paseId).padStart(6,'0')} registrado correctamente.`;
+
+    // Mostrar botón de descarga
+    const btnPdf = document.getElementById('btn-descargar-pdf');
+    btnPdf.style.display = 'inline-block';
+    btnPdf.onclick = () => orientacionDescargarPdf(paseId);
+
+    ui.toast('Pase registrado. Ya puede descargar el PDF.');
+}
+
+async function orientacionDescargarPdf(paseId) {
+    const btn = document.getElementById('btn-descargar-pdf');
+    btn.disabled  = true;
+    btn.innerText = 'Generando PDF...';
+
+    const blob = await api.getPasePdf(paseId);
+
+    btn.disabled  = false;
+    btn.innerText = '⬇ DESCARGAR PDF';
+
+    if (!blob) {
+        ui.toast('Error al generar el PDF', 'error');
+        return;
+    }
+
+    // Descarga programática
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = `pase-${String(paseId).padStart(6,'0')}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 async function orientacionBuscarHorario() {

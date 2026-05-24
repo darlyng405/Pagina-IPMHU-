@@ -100,7 +100,24 @@ export async function guardarExcusa(payload) {
 export async function guardarPase(payload) {
     return await authFetch('/pase', { method: 'POST', body: JSON.stringify(payload) });
 }
-// payload esperado: { tipo, idEstudiante, motivo, autorizadoPor, cedulaRetira, nombreRetira }
+
+/**
+ * getPasePdf(id)
+ * Descarga el PDF del pase con el id indicado.
+ * Devuelve un Blob listo para abrir/descargar, o null si hubo error.
+ */
+export async function getPasePdf(id) {
+    try {
+        const res = await fetch(`${API_BASE}/pase/${id}/pdf`, {
+            headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
+        });
+        if (!res.ok) return null;
+        return await res.blob();
+    } catch (err) {
+        console.error('Error al obtener PDF del pase:', err);
+        return null;
+    }
+}
 
 // ── Horario / Auditoría ───────────────────────────────────────────────────────
 export async function getHorario(id, tipo) {
