@@ -1,4 +1,4 @@
-// js/app.js — Orquestador principal: auth, router, sidebar.
+   // js/app.js — Orquestador principal: auth, router, sidebar.
 // Toda la lógica de vistas vive en los módulos de rol correspondientes.
 import { store }                           from './store.js';
 import * as api                            from './api.js';
