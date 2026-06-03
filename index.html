@@ -28,7 +28,7 @@
             --shadow-lg:    0 15px 30px rgba(0, 48, 135, 0.15);
         }
 
-        /* ── Reset & Base ─────────────────────────────────────────────── */
+        /*  Reset y Base */
         *, *::before, *::after { box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
@@ -40,7 +40,7 @@
             overflow: hidden;
         }
 
-        /* ── Utilities ────────────────────────────────────────────────── */
+        /* Utilities */
         .hidden  { display: none !important; }
         .wrapper { display: flex; width: 100%; height: 100%; }
         .card {
@@ -57,7 +57,7 @@
             gap: 20px;
         }
 
-        /* ── LOGIN ────────────────────────────────────────────────────── */
+        /* LOGIN */
         #login-overlay {
             position: fixed;
             inset: 0;
@@ -101,7 +101,7 @@
             margin: 4px 0 0 0;
         }
 
-        /* ── SIDEBAR ──────────────────────────────────────────────────── */
+        /* SIDEBAR */
         .sidebar {
             width: 280px;
             background: var(--surface);
@@ -157,7 +157,7 @@
         }
         .logout-btn:hover { background: var(--accent); color: white; }
 
-        /* ── MAIN CONTENT ─────────────────────────────────────────────── */
+        /*  MAIN CONTENT */
         .main-content {
             flex: 1;
             display: flex;
@@ -188,7 +188,7 @@
         }
         .scroll-area { padding: 32px; overflow-y: auto; flex: 1; }
 
-        /* ── FORMS & INPUTS ───────────────────────────────────────────── */
+        /*  FORMS e INPUTS */
         input, select, textarea {
             width: 100%;
             padding: 12px 14px;
@@ -226,7 +226,7 @@
         .btn-danger  { background: var(--accent); color: white; }
         .btn-danger:hover { background: #b71c1c; }
 
-        /* ── TABLES ───────────────────────────────────────────────────── */
+        /*  TABLES */
         .web-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px; }
         .web-table th {
             text-align: left;
@@ -241,18 +241,18 @@
         .web-table tr:last-child td { border-bottom: none; }
         .web-table tbody tr:hover { background: #f8faff; }
 
-        /* ── HOJA CUADRICULADA (Docente) ──────────────────────────────── */
+        /* HOJA CUADRICULADA (Docente) */
         .hoja-cuadriculada { width: 100%; border-collapse: collapse; background: white; color: var(--text-main); margin-top: 20px; border: 1px solid var(--text-main); }
         .hoja-cuadriculada th { border: 1px solid var(--text-main); padding: 10px 8px; background: var(--primary); color: white; text-transform: uppercase; font-size: 0.7rem; font-weight: 600; }
         .hoja-cuadriculada td { border: 1px solid var(--text-main); padding: 8px; font-size: 0.85rem; }
         .col-dia { width: 22px; text-align: center; padding: 2px !important; font-size: 0.7rem !important; }
 
-        /* ── TAREAS ───────────────────────────────────────────────────── */
+        /* TAREAS */
         .task-card { border-left: 5px solid var(--primary); background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .task-card.completed { border-left-color: var(--success); opacity: 0.8; }
         .filter-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
 
-        /* ── MOBILE ───────────────────────────────────────────────────── */
+        /* MOBILE */
         .menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: white; margin-right: 10px; padding: 0; width: auto; }
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
         @media (max-width: 768px) {
@@ -267,7 +267,7 @@
             .grid { grid-template-columns: 1fr; }
         }
 
-        /* ── PRINT ────────────────────────────────────────────────────── */
+        /* PRINT  */
         @media print {
             .sidebar, .top-bar, .no-print { display: none !important; }
             .card { box-shadow: none; border: none; padding: 0; }
@@ -279,7 +279,7 @@
 
 <body>
 
-<!-- ── LOGIN ──────────────────────────────────────────────────────────────── -->
+<!-- LOGIN -->
 <section id="login-overlay" aria-label="Inicio de sesión">
     <div class="login-card">
         <img src="logo.png" alt="Logo IPMHU" class="logo-img"
@@ -306,7 +306,7 @@
     </div>
 </section>
 
-<!-- ── APP ────────────────────────────────────────────────────────────────── -->
+<!-- APP -->
 <div id="app" class="hidden wrapper">
 
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
