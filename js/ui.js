@@ -1,8 +1,8 @@
 // ui.js — Construye HTML a partir de datos limpios (sin fetch, sin lógica de negocio)
 
 /**
- * Escapa caracteres HTML especiales para prevenir XSS.
- * Usar siempre que se inyecten datos del backend en innerHTML.
+ - Escapa caracteres HTML especiales para prevenir XSS.
+ - Usar siempre que se inyecten datos del backend en innerHTML.
  */
 function s(val) {
     if (val === null || val === undefined) return '';
@@ -14,7 +14,7 @@ function s(val) {
         .replace(/'/g, '&#39;');
 }
 
-// ==================== PERFIL REUTILIZABLE ====================
+// PERFIL REUTILIZABLE
 export function renderPerfil(usuario) {
     const rol = usuario.rol;
     if (rol === 'Estudiante') {
@@ -47,7 +47,7 @@ export function renderPerfil(usuario) {
     }
 }
 
-// ==================== TABLAS DE ASISTENCIA / NOTAS ====================
+// TABLAS DE ASISTENCIA / NOTAS 
 export function renderTablaAsistencia(alumnos) {
     let html = `<table class="web-table"><thead><tr><th>Estudiante</th><th>Asistencia</th></tr></thead><tbody>`;
     alumnos.forEach(a => {
@@ -69,7 +69,7 @@ export function renderTablaNotas(alumnos) {
     return html;
 }
 
-// ==================== TAREAS ====================
+// TAREAS 
 export function renderTareas(tareas) {
     if (!tareas.length) return '<p>No hay tareas asignadas.</p>';
     const hoy = new Date(); hoy.setHours(0,0,0,0);
@@ -95,7 +95,7 @@ export function renderTareas(tareas) {
     `;
 }
 
-// ==================== HORARIO ====================
+// HORARIO
 export function renderHorarioTable(data) {
     let h = `<table class="web-table"><thead><tr><th>Hora</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr></thead><tbody>`;
     data.forEach(r => {
@@ -104,7 +104,7 @@ export function renderHorarioTable(data) {
     return h + '</tbody></table>';
 }
 
-// ==================== EXCUSAS (DOCENTE / ORIENTACIÓN) ====================
+// EXCUSAS (DOCENTE / ORIENTACIÓN) 
 export function renderExcusas(excusas) {
     const hoy = new Date(); hoy.setHours(0,0,0,0);
     const activas = excusas.filter(e => new Date(e.hasta) >= hoy);
@@ -129,7 +129,7 @@ export function renderExcusas(excusas) {
     return html;
 }
 
-// ==================== LISTADOS (IMPRIMIR) ====================
+// LISTADOS (IMPRIMIR) 
 export function renderListado(alumnos) {
     return `<button onclick="window.print()" class="btn-primary no-print" style="margin-bottom:15px">IMPRIMIR</button>
         <table class="hoja-cuadriculada"><thead><tr><th>#</th><th>Nombre</th><th>Firma</th></tr></thead><tbody>
@@ -137,7 +137,7 @@ export function renderListado(alumnos) {
         </tbody></table>`;
 }
 
-// ==================== HISTORIAL DE ASISTENCIA ====================
+// HISTORIAL DE ASISTENCIA 
 export function renderHistorial(datos, diasDelMes) {
     let reporte = {};
     datos.forEach(r => {
@@ -161,7 +161,7 @@ export function renderHistorial(datos, diasDelMes) {
     return h;
 }
 
-// ==================== REPORTE DE NOTAS ====================
+// REPORTE DE NOTAS 
 export function renderReporteNotas(estudiantes, colsArray, materiaNombre) {
     let h = `<div style="text-align:right; margin-bottom:10px;"><button class="btn-primary" onclick="window.print()" style="width:auto;">IMPRIMIR</button></div>
             <table class="hoja-cuadriculada"><thead><tr>
@@ -179,7 +179,7 @@ export function renderReporteNotas(estudiantes, colsArray, materiaNombre) {
     return h;
 }
 
-// ==================== FILTROS DE TABLA ====================
+// FILTROS DE TABLA 
 export function filtrarTabla(tableId, colIndex, val) {
     const filter = val.toUpperCase();
     const rows = document.getElementById(tableId).getElementsByTagName("tr");
