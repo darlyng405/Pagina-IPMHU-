@@ -5,15 +5,15 @@ let _onUnauthorized = null;
 
 export function setToken(token) { AUTH_TOKEN = token; }
 
-/** Registra un callback para cuando el token expire (F-UX-02) */
+// Registra un callback para cuando el token expire (F-UX-02)
 export function onUnauthorized(fn) { _onUnauthorized = fn; }
 
 /**
- * authFetch
- * - Inyecta JWT
- * - Adjunta _status a la respuesta
- * - F-UX-02: si recibe 401 llama a _onUnauthorized (logout automático)
- * - F-ARC-03: eliminado normalizeKeys — el backend ya devuelve camelCase
+- authFetch
+- Inyecta JWT
+- Adjunta _status a la respuesta
+- F-UX-02: si recibe 401 llama a _onUnauthorized (logout automático)
+- F-ARC-03: eliminado normalizeKeys — el backend ya devuelve camelCase
  */
 async function authFetch(endpoint, options = {}) {
     const headers = {
@@ -39,7 +39,7 @@ async function authFetch(endpoint, options = {}) {
     }
 }
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
+// Auth
 export async function login(usuario, password) {
     return await authFetch('/login', { method: 'POST', body: JSON.stringify({ usuario, password }) });
 }
@@ -51,7 +51,7 @@ export async function cambiarPassword(passwordActual, passwordNueva) {
     });
 }
 
-// ── Docente ───────────────────────────────────────────────────────────────────
+// Docente
 export async function getAlumnos(cursoId) {
     return await authFetch(`/getAlumnos?curso=${cursoId}`);
 }
@@ -83,7 +83,7 @@ export async function getReporteNotas(curso, periodo, filtro = '') {
     return await authFetch(`/getReporteNotas?curso=${curso}&periodo=${encodeURIComponent(periodo)}&filtro=${encodeURIComponent(filtro)}`);
 }
 
-// ── Estudiante ────────────────────────────────────────────────────────────────
+// Estudiante
 export async function getStudentGradesDetail() { return await authFetch('/getStudentGradesDetail'); }
 export async function getStudentGradesP()      { return await authFetch('/getStudentGradesP'); }
 export async function getStudentGradesRA()     { return await authFetch('/getStudentGradesRA'); }
@@ -92,7 +92,7 @@ export async function getStudentExcuses()      { return await authFetch('/getStu
 export async function getTareasEstudiante()    { return await authFetch('/getTareasEstudiante'); }
 export async function getStudentReports()      { return await authFetch('/getStudentReports'); }
 
-// ── Orientación ───────────────────────────────────────────────────────────────
+// Orientación
 export async function buscarEstudiante(id) { return await authFetch(`/buscarEstudiante?id=${id}`); }
 export async function guardarExcusa(payload) {
     return await authFetch('/excusa', { method: 'POST', body: JSON.stringify(payload) });
@@ -102,9 +102,9 @@ export async function guardarPase(payload) {
 }
 
 /**
- * getPasePdf(id)
- * Descarga el PDF del pase con el id indicado.
- * Devuelve un Blob listo para abrir/descargar, o null si hubo error.
+ - getPasePdf(id)
+ - Descarga el PDF del pase con el id indicado.
+ - Devuelve un Blob listo para abrir/descargar, o null si hubo error.
  */
 export async function getPasePdf(id) {
     try {
@@ -119,7 +119,7 @@ export async function getPasePdf(id) {
     }
 }
 
-// ── Horario / Auditoría ───────────────────────────────────────────────────────
+// Horario / Auditoría
 export async function getHorario(id, tipo) {
     return await authFetch(`/getHorario?id=${encodeURIComponent(id)}&tipo=${tipo}`);
 }
