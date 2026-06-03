@@ -9,14 +9,14 @@ import { loadOrientacionView }             from './orientacionView.js';
 import { loadCoordinacionView }            from './coordinacionView.js';
 import { loadAdminView }                   from './adminView.js';
 
-// ── Exponer filtrarTabla para los onchange de filtros generados dinámicamente ──
+// ── Exponer filtrarTabla para los onchange de filtros generados dinámicamente
 window.ui = { filtrarTabla: ui.filtrarTabla };
 
-// ── Suscripciones al store ────────────────────────────────────────────────────
+// ── Suscripciones al store
 store.on('token', (token) => api.setToken(token));
 store.on('role',  (role)  => { if (role) renderSidebar(); });
 
-// ── Inicialización ────────────────────────────────────────────────────────────
+// ── Inicialización
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-login').addEventListener('click', handleLogin);
     document.getElementById('logout-btn').addEventListener('click', logout);
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ── AUTH ──────────────────────────────────────────────────────────────────────
+// ── AUTH 
 async function handleLogin() {
     const u   = document.getElementById('login-user').value.trim();
     const p   = document.getElementById('login-pass').value;
@@ -94,7 +94,7 @@ function logout() {
     document.getElementById('login-msg').innerText = '';
 }
 
-// ── MENÚ ──────────────────────────────────────────────────────────────────────
+// ── MENÚ 
 function toggleMenu() {
     document.getElementById('sidebar').classList.toggle('active');
     document.getElementById('sidebar-overlay').classList.toggle('active');
@@ -105,7 +105,7 @@ function closeMobileMenu() {
     document.getElementById('sidebar-overlay').classList.remove('active');
 }
 
-// ── SIDEBAR ───────────────────────────────────────────────────────────────────
+// ── SIDEBAR 
 const NAV_ITEMS = {
     Admin: [
         ['usuarios',      'Gestión de Usuarios'],
@@ -184,7 +184,7 @@ function setActiveNav(view) {
     });
 }
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
+// ── HELPERS 
 function on(id, event, fn) {
     document.getElementById(id)?.addEventListener(event, fn);
 }
@@ -192,7 +192,7 @@ function on(id, event, fn) {
 // Contexto compartido que se pasa a los módulos de vista
 const ctx = () => ({ setActiveNav, on });
 
-// ── ROUTER ────────────────────────────────────────────────────────────────────
+// ── ROUTER 
 function navigate(view) {
     const role = store.get('role');
 
