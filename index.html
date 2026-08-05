@@ -18,28 +18,46 @@
 
 <!-- LOGIN -->
 <section id="login-overlay" aria-label="Inicio de sesión">
-    <div class="login-card">
-        <img src="logo.png" alt="Logo IPMHU" class="logo-img"
-             onerror="this.style.display='none'">
+    <div class="login-shell">
+        <div class="brand-panel">
+            <span class="brand-badge">IPMHU</span>
+            <h1>Gestión Académica</h1>
+            <p>Plataforma institucional para coordinación, docentes, orientación y estudiantes.</p>
+            <div class="brand-stats">
+                <div>
+                    <strong>4 roles</strong>
+                    <span>Integrados</span>
+                </div>
+                <div>
+                    <strong>100%</strong>
+                    <span>Centralizado</span>
+                </div>
+            </div>
+        </div>
 
-        <h2 class="login-title">Sistema de Gestión Académica</h2>
-        <p class="login-subtitle">Acceso Institucional — IPMHU</p>
+        <div class="login-card">
+            <img src="logo.png" alt="Logo IPMHU" class="logo-img"
+                 onerror="this.style.display='none'">
 
-        <input
-            type="text"
-            id="login-user"
-            placeholder="Usuario / ID"
-            autocomplete="username"
-        >
-        <input
-            type="password"
-            id="login-pass"
-            placeholder="Contraseña"
-            autocomplete="current-password"
-        >
+            <h2 class="login-title">Sistema de Gestión Académica</h2>
+            <p class="login-subtitle">Acceso Institucional — IPMHU</p>
 
-        <button class="btn-primary" id="btn-login">Ingresar</button>
-        <p id="login-msg" class="login-msg"></p>
+            <input
+                type="text"
+                id="login-user"
+                placeholder="Usuario / ID"
+                autocomplete="username"
+            >
+            <input
+                type="password"
+                id="login-pass"
+                placeholder="Contraseña"
+                autocomplete="current-password"
+            >
+
+            <button class="btn-primary" id="btn-login">Ingresar</button>
+            <p id="login-msg" class="login-msg"></p>
+        </div>
     </div>
 </section>
 
