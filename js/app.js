@@ -8,6 +8,7 @@ import { loadStudentView }                 from './estudianteView.js';
 import { loadOrientacionView }             from './orientacionView.js';
 import { loadCoordinacionView }            from './coordinacionView.js';
 import { loadAdminView }                   from './adminView.js';
+import { loadSecretariaView }              from './secretariaView.js';
 
 // ── Exponer filtrarTabla para los onchange de filtros generados dinámicamente
 window.ui = { filtrarTabla: ui.filtrarTabla };
@@ -83,6 +84,7 @@ function setupUI() {
     else if (role === 'Orientacion')  navigate('bus');
     else if (role === 'Estudiante')   navigate('perfil');
     else if (role === 'Coordinacion') navigate('horarios');
+    else if (role === 'Secretaria')   navigate('solicitudes');
 }
 
 function logout() {
@@ -148,6 +150,12 @@ const NAV_ITEMS = {
         ['auditoria', 'Auditoría de Asistencia'],
         ['perfil',    'Mi Perfil'],
     ],
+    Secretaria: [
+        ['solicitudes',     'Solicitudes'],
+        ['nueva-solicitud', 'Nueva Solicitud'],
+        ['buscar-estudiante', 'Buscar Estudiante'],
+        ['perfil',          'Mi Perfil'],
+    ],
     Estudiante: [
         ['perfil',         'Mi Perfil'],
         ['tareas',         'Mis Tareas'],
@@ -205,5 +213,6 @@ function navigate(view) {
     else if (role === 'Docente')      loadDocenteView(view, ctx());
     else if (role === 'Orientacion')  loadOrientacionView(view, ctx());
     else if (role === 'Coordinacion') loadCoordinacionView(view, ctx());
+    else if (role === 'Secretaria')   loadSecretariaView(view, ctx());
     else if (role === 'Estudiante')   loadStudentView(view, ctx());
 }
