@@ -119,6 +119,20 @@ export async function getPasePdf(id) {
     }
 }
 
+// Secretaría
+export async function buscarEstudianteSecretaria(id) {
+    return await authFetch(`/buscarEstudianteSecretaria?id=${encodeURIComponent(id)}`);
+}
+export async function getSolicitudesSecretaria(estado = '') {
+    return await authFetch(`/getSolicitudesSecretaria${estado ? `?estado=${encodeURIComponent(estado)}` : ''}`);
+}
+export async function crearSolicitudSecretaria(payload) {
+    return await authFetch('/crearSolicitudSecretaria', { method: 'POST', body: JSON.stringify(payload) });
+}
+export async function entregarSolicitudSecretaria(id, payload) {
+    return await authFetch(`/entregarSolicitudSecretaria/${id}`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
 // Horario / Auditoría
 export async function getHorario(id, tipo) {
     return await authFetch(`/getHorario?id=${encodeURIComponent(id)}&tipo=${tipo}`);
