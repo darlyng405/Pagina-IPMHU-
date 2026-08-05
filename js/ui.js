@@ -4,7 +4,7 @@
  - Escapa caracteres HTML especiales para prevenir XSS.
  - Usar siempre que se inyecten datos del backend en innerHTML.
  */
-function s(val) {
+export function s(val) {
     if (val === null || val === undefined) return '';
     return String(val)
         .replace(/&/g, '&amp;')
@@ -12,6 +12,28 @@ function s(val) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+}
+
+export function toast(message, type = 'success') {
+    const existing = document.getElementById('global-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'global-toast';
+    toast.textContent = message;
+    toast.style.position = 'fixed';
+    toast.style.right = '20px';
+    toast.style.bottom = '20px';
+    toast.style.zIndex = '9999';
+    toast.style.padding = '12px 16px';
+    toast.style.borderRadius = '10px';
+    toast.style.color = '#fff';
+    toast.style.background = type === 'error' ? '#b42318' : '#0f766e';
+    toast.style.boxShadow = '0 10px 30px rgba(0,0,0,.25)';
+    toast.style.maxWidth = '360px';
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.remove(), 2600);
 }
 
 // PERFIL REUTILIZABLE
