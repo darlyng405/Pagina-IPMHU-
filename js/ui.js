@@ -16,19 +16,34 @@ function s(val) {
 
 // PERFIL REUTILIZABLE
 export function renderPerfil(usuario) {
+    if (!usuario) return '<div class="card"><h3>Mi Perfil</h3><p>No hay datos de usuario disponibles.</p></div>';
+
     const rol = usuario.rol;
+    const nombre = usuario.nombreCompleto || usuario.nombre_completo || usuario.nombre || '';
+    const idSistema = usuario.idSistema || usuario.id_sistema || usuario.id || '';
+    const curso = usuario.curso || usuario.cursoNombre || '';
+    const cedula = usuario.cedula || '';
+    const telefono = usuario.telefono || '';
+    const email = usuario.email || '';
+    const direccion = usuario.direccion || '';
+    const fechaIngreso = usuario.fecha_ingreso ? new Date(usuario.fecha_ingreso).toLocaleDateString() : '';
+    const padre = usuario.nombrePadre || usuario.nombre_padre || '';
+    const telPadre = usuario.telPadre || usuario.tel_padre || '';
+    const madre = usuario.nombreMadre || usuario.nombre_madre || '';
+    const telMadre = usuario.telMadre || usuario.tel_madre || '';
+
     if (rol === 'Estudiante') {
         return `
             <div class="card">
                 <h3>Mi Perfil</h3>
                 <div class="grid">
-                    <div><label>Nombre</label><input value="${s(usuario.nombre_completo)}" readonly></div>
-                    <div><label>Curso</label><input value="${s(usuario.curso)}" readonly></div>
-                    <div><label>ID</label><input value="${s(usuario.id_sistema)}" readonly></div>
+                    <div><label>Nombre</label><input value="${s(nombre)}" readonly></div>
+                    <div><label>Curso</label><input value="${s(curso)}" readonly></div>
+                    <div><label>ID</label><input value="${s(idSistema)}" readonly></div>
                 </div>
                 <div class="grid">
-                    <div><label>Padre</label><input value="${s(usuario.nombre_padre)} (${s(usuario.tel_padre) || 'S/N'})" readonly></div>
-                    <div><label>Madre</label><input value="${s(usuario.nombre_madre)} (${s(usuario.tel_madre) || 'S/N'})" readonly></div>
+                    <div><label>Padre</label><input value="${s(padre ? `${padre} (${telPadre || 'S/N'})` : '')}" readonly></div>
+                    <div><label>Madre</label><input value="${s(madre ? `${madre} (${telMadre || 'S/N'})` : '')}" readonly></div>
                 </div>
             </div>`;
     } else {
@@ -36,12 +51,12 @@ export function renderPerfil(usuario) {
             <div class="card">
                 <h3>Mi Perfil</h3>
                 <div class="grid">
-                    <div><label>Nombre</label><input value="${s(usuario.nombre_completo)}" readonly></div>
-                    <div><label>Cédula</label><input value="${s(usuario.cedula)}" readonly></div>
-                    <div><label>Teléfono</label><input value="${s(usuario.telefono)}" readonly></div>
-                    <div><label>Email</label><input value="${s(usuario.email)}" readonly></div>
-                    <div><label>Dirección</label><input value="${s(usuario.direccion)}" readonly></div>
-                    <div><label>Fecha Ingreso</label><input value="${s(usuario.fecha_ingreso ? new Date(usuario.fecha_ingreso).toLocaleDateString() : '')}" readonly></div>
+                    <div><label>Nombre</label><input value="${s(nombre)}" readonly></div>
+                    <div><label>Cédula</label><input value="${s(cedula)}" readonly></div>
+                    <div><label>Teléfono</label><input value="${s(telefono)}" readonly></div>
+                    <div><label>Email</label><input value="${s(email)}" readonly></div>
+                    <div><label>Dirección</label><input value="${s(direccion)}" readonly></div>
+                    <div><label>Fecha Ingreso</label><input value="${s(fechaIngreso)}" readonly></div>
                 </div>
             </div>`;
     }
